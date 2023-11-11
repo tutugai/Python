@@ -65,7 +65,6 @@ def sw(path):
     for i in jswork(path):
         print(i.strip())
 
-
 #url爬虫实现
 def send_get(url,cookie=None):
     results = []
@@ -74,7 +73,7 @@ def send_get(url,cookie=None):
     }
     for i in url:
         response = requests.get(url=i,headers=headers,cookies=cookie)
-        if response.status_code in [200,302,401,301,403]:
+        if response.status_code in [200,302,401,301,403,404,500,403]:
             results.append(str(response.status_code)+'-'+str(len(response.content))+': '+i.strip())
     return results
 #url拼接url_path处理
@@ -99,7 +98,7 @@ def pw(args):
             for j in jswork(i):
                 url_path.append(j.strip())
     else:
-        for i in jswork(getattr(args,'alone')):
+        for i in jswork(str(getattr(args,'alone'))):
             url_path.append(i.strip())
     #通过url_path，处理成url
     url_l = url(args.url,url_path)
@@ -117,9 +116,8 @@ def parse_args():
     parse = argparse.ArgumentParser(usage='js_tackle工具',description='描述：处理js文件的脚本：主要用于从js文件中提取url_path，进行未授权接口检测（日常批量自动化处理~）；')
     parse.add_argument('-r','--range',help='js文件所处目录路径：大范围js文件中提取url_path处理')
     parse.add_argument('-a','--alone',help='js文件路径：单个js文件中提取url_path处理')
-    parse.add_argument('-p','--ptest',action='store_true',help='（可选）只有填了这个参数才会测试接口，不然仅仅爬取url_path并输出！')
-    parse.add_argument('-u','--url',help='（可选）(选择了-p参数必选)需要根据提取的path测试未授权接口的url')
-    parse.add_argument('-c','--cookie',help='（可选）（可选）cookie设置')
+    parse.add_argument('-u','--url',help='（可选）只有填了这个参数才会测试接口，不然仅仅爬取url_path并输出！需要根据提取的path测试未授权接口的url')
+    parse.add_argument('-c','--cookie',help='（可选）cookie设置')
     args = parse.parse_args()
     return args
 #程序主运行函数
@@ -128,14 +126,23 @@ def main(args):
     actions = {
         "range": bw,
         "alone": sw,
+        "url":  pw,
     }
     #循环判断命令行参数选择
-    for action in actions:
+    for action, function in actions.items():
         if getattr(args,action):
-            if getattr(args,'ptest') and getattr(args,'url'):
-                pw(args)
-            else: 
-                actions[action](getattr(args,action))
+            #检查当前函数是否有参数（在 Python 中，每个函数都有一个 __code__ 属性，它包含了函数的字节码、常量和其他一些相关信息。其中的 co_argcount 属性表示了函数定义时的参数个数。）
+            if getattr(function, '__code__').co_argcount > 0:
+                #特殊方法pw，需要直接传递args
+                if getattr(args,'url'):
+                    pw(args)
+                    break
+                else:
+                    value = getattr(args, action)
+                    function(value)
+            else:
+            #如果函数不需要参数，就直接调用 function()
+                function()
 
 if __name__ == "__main__":
     main(parse_args())
