@@ -10,7 +10,9 @@
 --js-url2.py	本地js未授权url处理
 
 --KB.py	日常缝合怪
+
         描述：小公举~缝合怪，按需添加！
+        
         options:
               -h, --help            show this help message and exit
               -g, --goby            处理goby资产~导出端口对应ip
