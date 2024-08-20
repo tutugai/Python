@@ -8,8 +8,9 @@
     --s7-stop.py	s7协议启停攻击
     --forwarding.py	本地端口转发
     --js-url2.py	本地js未授权url处理
-    --KB.py	日常缝合怪
+    --threadcrawl.py	多线程qps计数
     
+    --KB.py	日常缝合怪
     options:
           -h, --help            show this help message and exit
           -g, --goby            处理goby资产~导出端口对应ip
